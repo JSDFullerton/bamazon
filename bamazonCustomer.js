@@ -3,6 +3,9 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 var table = require('cli-table');
 
+// GLOBAL VARIABLES
+var productList = [];
+
 
 // MySQL CONNECTION
 var connection = mysql.createConnection({
@@ -16,7 +19,7 @@ var connection = mysql.createConnection({
 
 
 
-// CALL MySQL CONNECTION
+// WORKING - CALL MySQL CONNECTION
 connection.connect(function(error) {
 	if (error) {
 		console.log("SQL Connection Error: " + error );
@@ -24,7 +27,7 @@ connection.connect(function(error) {
 	}
 	else {
 		console.log("DB Connection Established");
-		// run function to dipslay product table
+
 		// run customerStart Funct (Inquirer Prompt)
 		customerStart();
 	}
@@ -34,27 +37,41 @@ connection.connect(function(error) {
 
 
 
-// USER START FUNCTION - CREATE OR BUY PRODUCT
+// WORKING - USER START FUNCTION - CREATE OR BUY PRODUCT
 function customerStart() {
 	inquirer.prompt([
 
 		{
 		type: "list",
 		name: "customerAction",
-		message: "Would you like to buy or create a product?",
+		message: "Would you like to buy or sell a product?",
 		choices: ["Buy Product", "Sell Product"]
 		}
 
 	])// close inquier prompt
 	.then(function(response) {
+
 		console.log("CUSTOMER RESPONSE: " + response.customerAction);
+		console.log("---------------------------");
+		console.log("++++++++++++++++++++++++++++");
 
 
 		if (response.customerAction === "Buy Product") {
+
+
+			// WORKING - run function to dipslay product table
 			displayTable();
+			console.log("---------------------------");
+			console.log("++++++++++++++++++++++++++++");
+
+			// WORKING - run buyProduct Funct
+			buyProduct();
+
+
 		}
 		else {
 			// run sellProduct Function
+			sellProduct();
 		}
 
 	});// close .then function
@@ -68,8 +85,6 @@ function customerStart() {
 // DISPLAY PRODUCT TABLE
 function displayTable() {
 
-	var productList = [];
-
 	connection.query("SELECT * FROM products", function(error, response) {
 
 		if (error) {
@@ -80,8 +95,8 @@ function displayTable() {
 		else {
 			// npm package to create & display product table
 			var productTable = new table({
-				head: ["ID", "NAME", "DEPARTMENT", "Price ($)", "Quantity in Inventory"],
-				colWidths: [5, 20, 20, 10, 10]
+				head: ["ID", "NAME", "DEPARTMENT", "Price ($)", "Quantity in Stock"],
+				colWidths: [5, 20, 20, 20, 20]
 			});
 
 
@@ -107,7 +122,7 @@ function buyProduct() {
 	// Connect to SQL to Pull Products
 	connection.query("SELECT * FROM products", function(error, response) {
 		if(error) {
-			console.log("ERROR w/ purchaseProduct Funct" + error);
+			console.log("ERROR w/ buyProduct Funct" + error);
 			return;
 		}
 
@@ -126,38 +141,75 @@ function buyProduct() {
 
 		])// close inquirer
 		.then(function(response){
-			var itemID = parseInt(response.product_id);
+
+			var purchasedItemID = parseInt(response.productID);
 			var purchaseQuantity = parseInt(response.quantity);
+			var purchasedItemName = "";
+			var currentInventory = "";
 
-			// Check if item ID is valid
-			if (itemID < 1 || id >= productList.length) {
 
-				console.log("------------------------");
+
+			// WORKING - Check if item ID is valid
+			if (purchasedItemID < 1 || purchasedItemID >= productList.length) {
+
 				console.log("Item Not Found: Please Enter Product ID Number again");
+				console.log("---------------------------");
+				console.log("++++++++++++++++++++++++++++");
 				buyProduct();
 
 			}// close if state
 
-			var currentInventory = ??????
 
+
+			// WORKING - If ID Valid - display desured product ID, name, quantity & current stock
+			else {
+
+			var purchasedItemName = productList[purchasedItemID-1][1];
+			var currentInventory = productList[purchasedItemID-1][4];
+
+				console.log("PRODUCT LIST:");
+				console.log(productList);
+				console.log("---------------------------");
+				console.log("++++++++++++++++++++++++++++");
+				
+				console.log("PURCHSED ITEM ID: " + purchasedItemID);
+				console.log("PRODUCT PURCHASED: " + purchasedItemName);
+				console.log("QUANTITY PURCHASED: " + purchaseQuantity);
+				console.log("CURRENT STOCK: " + currentInventory);
+				console.log("---------------------------");
+				console.log("++++++++++++++++++++++++++++");
+			
+			}// close else state
+
+
+			// WORKING - Check to make sure enough of Item in stock
 			if (purchaseQuantity > currentInventory) {
-				console.log("------------------------");
-				console.log("Not Enough of that item in stock - we only have: " + currentInventory " left");
+
+				console.log("Not Enough of that item in stock - we only have: " + currentInventory + " left");
+				console.log("---------------------------");
+				console.log("++++++++++++++++++++++++++++");
 				buyProduct();
 
-			}// close if state
+			}// close else if state
+
 
 			else {
 				var newInventory = currentInventory - purchaseQuantity;
-				console.log("HUZZAAH!!! You purchased " + purchaseQuantity + PRODUCT NAME??????????);
+				var cost = parseFloat(purchaseQuantity * parseFloat(productList[purchasedItemID-1][3]));
+
+				console.log("HUZZAAH!!! You purchased " + purchaseQuantity + " " + purchasedItemName + "(s)");
+				console.log("TOTAL COST: " + cost + " Rupees");
+				console.log("REMAINING INVENTORY: " + newInventory);
+
 
 				// UPDATE SQL W/ NEW QTY LEFT IN STOCK
 				connection.query("UPDATE products SET ? WHERE ?", [
 						{
-							stock_quantity: new_qty;
-						}
+							inventory_quantity: newInventory,
+							product_sales: cost.toFixed(2)
+						},
 						{
-							item_id: itemID
+							item_id: purchasedItemID
 						}
 
 					],
@@ -169,6 +221,8 @@ function buyProduct() {
 					})// error function close
 
 			}// close else state
+
+			// Restart Function for customer Start
 			customerStart();
 
 		})// close .then function		
@@ -177,7 +231,51 @@ function buyProduct() {
 
 
 // SELL PRODUCT FUNCTION
+function sellProduct() {
+	// Connect to SQL to Pull Products
+	connection.query("SELECT * FROM products", function(error, response) {
+		if(error) {
+			console.log("ERROR w/ buyProduct Funct" + error);
+			return;
+		}
 
+		console.log("SHOPKEEP: Well what da ya got to offer....?")
+		console.log("---------------------------");
+
+		inquirer.prompt([
+			{
+				type: "input",
+				name: "newProductName",
+				message: "Enter the name of the product you'd like to sell",
+
+			},
+			{
+				type: "input",
+				name: "quantity",
+				message: "How many do you want to sell?"
+			},
+			{
+				type: "input",
+				name: "price",
+				message: "How much do you want for it?"
+			}
+
+		])// close inquirer
+		.then(function(response){
+
+			var newItemName = response.newProductName;
+			var newItemQuantity = parseInt(response.quantity);
+			var newItemPrice = parseInt(response.price);
+
+			console.log("SOLD ITEM: " + newItemName);
+			console.log("SOLD QUANTITY: " + newItemQuantity);
+			console.log("PRICE: " + newItemPrice);
+			console.log("TOTAL MONEY EARNED: " + parseFloat(newItemPrice * newItemQuantity));
+
+
+		});// close .then funct
+	});// close SQL query request
+}// close sellProduct funct
 
 
 
