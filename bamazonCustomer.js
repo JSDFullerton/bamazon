@@ -19,7 +19,7 @@ var connection = mysql.createConnection({
 
 
 
-// WORKING - CALL MySQL CONNECTION
+// CALL MySQL CONNECTION - WORKING
 connection.connect(function(error) {
 	if (error) {
 		console.log("SQL Connection Error: " + error );
@@ -37,7 +37,7 @@ connection.connect(function(error) {
 
 
 
-// WORKING - USER START FUNCTION - CREATE OR BUY PRODUCT
+// USER START FUNCTION - CREATE OR BUY PRODUCT - WORKING
 function customerStart() {
 	inquirer.prompt([
 
@@ -59,12 +59,12 @@ function customerStart() {
 		if (response.customerAction === "Buy Product") {
 
 
-			// WORKING - run function to dipslay product table
+			// run function to dipslay product table - WORKING
 			displayTable();
 			console.log("---------------------------");
 			console.log("++++++++++++++++++++++++++++");
 
-			// WORKING - run buyProduct Funct
+			// run buyProduct Funct - WORKING 
 			buyProduct();
 
 
@@ -82,7 +82,7 @@ function customerStart() {
 
 
 
-// DISPLAY PRODUCT TABLE
+// DISPLAY PRODUCT TABLE - WORKING
 function displayTable() {
 
 	connection.query("SELECT * FROM products", function(error, response) {
@@ -117,7 +117,7 @@ function displayTable() {
 
 
 
-// BUY PRODUCT FUNCTION
+// BUY PRODUCT FUNCTION - WORKING
 function buyProduct() {
 	// Connect to SQL to Pull Products
 	connection.query("SELECT * FROM products", function(error, response) {
@@ -149,7 +149,7 @@ function buyProduct() {
 
 
 
-			// WORKING - Check if item ID is valid
+			//Check if item ID is valid - WORKING
 			if (purchasedItemID < 1 || purchasedItemID >= productList.length) {
 
 				console.log("Item Not Found: Please Enter Product ID Number again");
@@ -161,7 +161,7 @@ function buyProduct() {
 
 
 
-			// WORKING - If ID Valid - display desured product ID, name, quantity & current stock
+			//If ID Valid - display desured product ID, name, quantity & current stock - WORKING
 			else {
 
 			var purchasedItemName = productList[purchasedItemID-1][1];
@@ -182,7 +182,7 @@ function buyProduct() {
 			}// close else state
 
 
-			// WORKING - Check to make sure enough of Item in stock
+			//Check to make sure enough of Item in stock - WORKING
 			if (purchaseQuantity > currentInventory) {
 
 				console.log("Not Enough of that item in stock - we only have: " + currentInventory + " left");
@@ -202,7 +202,7 @@ function buyProduct() {
 				console.log("REMAINING INVENTORY: " + newInventory);
 
 
-				// WORKING - UPDATE SQL W/ NEW QTY LEFT IN STOCK
+				//UPDATE SQL W/ NEW QTY LEFT IN STOCK - WORKING 
 				connection.query("UPDATE products SET ? WHERE ?", [
 						{
 							inventory_quantity: newInventory,
@@ -230,51 +230,89 @@ function buyProduct() {
 }// close buyProduct funct
 
 
-// SELL PRODUCT FUNCTION
+
+
+//SELL PRODUCT FUNCTION - WORKING 
 function sellProduct() {
-	// Connect to SQL to Pull Products
-	connection.query("SELECT * FROM products", function(error, response) {
-		if(error) {
-			console.log("ERROR w/ buyProduct Funct" + error);
-			return;
-		}
 
-		console.log("SHOPKEEP: Well what da ya got to offer....?")
-		console.log("---------------------------");
-
-		inquirer.prompt([
-			{
-				type: "input",
-				name: "newProductName",
-				message: "Enter the name of the product you'd like to sell",
-
-			},
-			{
-				type: "input",
-				name: "quantity",
-				message: "How many do you want to sell?"
-			},
-			{
-				type: "input",
-				name: "price",
-				message: "How much do you want for it?"
+	//Connect to SQL to Pull Products - WORKING 
+		connection.query("SELECT * FROM products", function(error, response) {
+			if(error) {
+				console.log("ERROR w/ buyProduct Funct" + error);
+				return;
 			}
 
-		])// close inquirer
-		.then(function(response){
+			console.log("HYLIAN SHOPKEEP: Well what da ya got to offer....?")
+			console.log("---------------------------");
 
-			var newItemName = response.newProductName;
-			var newItemQuantity = parseInt(response.quantity);
-			var newItemPrice = parseInt(response.price);
+			inquirer.prompt([
+				{
+					type: "input",
+					name: "newProductName",
+					message: "Enter the name of the product you'd like to sell",
 
-			console.log("SOLD ITEM: " + newItemName);
-			console.log("SOLD QUANTITY: " + newItemQuantity);
-			console.log("PRICE: " + newItemPrice);
-			console.log("TOTAL MONEY EARNED: " + parseFloat(newItemPrice * newItemQuantity));
+				},
+				{
+					type: "rawlist",
+					name: "newProductDepart",
+					message: "Which department should sell this item?",
+					choices: ["Hyrule", "Forrest_Temple", "Shadow_Temple", "Temple_of_Time"]
+				},
+				{
+					type: "input",
+					name: "quantity",
+					message: "How many do you want to sell?"
+				},
+				{
+					type: "input",
+					name: "price",
+					message: "How much do you want for it?"
+				}
+
+			])// close inquirer
+			.then(function(response){
 
 
-		});// close .then funct
-	});// close SQL query request
+				var newItemID = (productList.length + 1); 
+				var newItemName = response.newProductName;
+				var newItemDept = response.newProductDepart;
+				var newItemPrice = parseInt(response.price);
+				var newItemQuantity = parseInt(response.quantity);
+				var newItemCost = parseFloat(0 - newItemQuantity * parseFloat(newItemPrice));
+
+
+				console.log("---------------------------");
+				console.log("SOLD ITEM: " + newItemName);
+				console.log("DEPARMENT: " + newItemDept);
+				console.log("SOLD QUANTITY: " + newItemQuantity);
+				console.log("PRICE: " + newItemPrice);
+				console.log("TOTAL MONEY EARNED: " + parseFloat(newItemPrice * newItemQuantity));
+
+
+				console.log("PRODUCT LIST LENGTH: " + productList.length)
+				console.log("NEW ITEM ID: " + newItemID)
+
+
+
+			// UPDATE SQL W/ NEW ITEM (NAME, DEPARTMENT, PRICE, QTY) - WORKING 
+
+				connection.query("INSERT INTO products SET ?", {
+
+					product_name: newItemName,
+					department_name: newItemDept,
+					price: parseFloat(newItemPrice).toFixed(2),
+					inventory_quantity: parseFloat(newItemQuantity).toFixed(2),
+					product_sales: newItemCost
+
+
+
+				});// close SQL query new product push
+
+					console.log("---------------------------");
+					console.log("HUZZAAH!!! Now I can sell " + newItemQuantity + " " + newItemName + "(s)");
+			
+			});// close .then funct
+		});// close SQL query request
 }// close sellProduct funct
 
 
