@@ -202,7 +202,7 @@ function buyProduct() {
 				console.log("REMAINING INVENTORY: " + newInventory);
 
 
-				// UPDATE SQL W/ NEW QTY LEFT IN STOCK
+				// WORKING - UPDATE SQL W/ NEW QTY LEFT IN STOCK
 				connection.query("UPDATE products SET ? WHERE ?", [
 						{
 							inventory_quantity: newInventory,
