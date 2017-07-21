@@ -59,7 +59,7 @@ Add New Product
 `Add New Product` allows the manager to add a new product not previously available to the store. First the name of the product is entered. Next, the manager chooses from a list of available departments. This is followed by the price of the product and then the quantity to be added.
 
 #### bamazonManager.js
-![Bamazon Manager](./images/manager.png)
+![Bamazon Manager](./images/manager_start.png)
 
 
 
