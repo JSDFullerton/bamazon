@@ -12,7 +12,7 @@ A command-line store app using npm packages MySQL and Inquirer that lets custome
 ## Installation
 1. First clone or download the source code.
 ```
-git clone https://github.com/jdwong415/Bamazon.git
+git clone git@github.com:JSDFullerton/bamazon.git
 ```
 2. Node.js is needed to run this app. Once that is installed, run the following to download dependenices using the Package.JSON file. 
 ```
@@ -27,14 +27,15 @@ node bamazonCustomer.js
 ```
 4. You will be prompted to choose either "buy" or "sell" and item. Choosing to "Buy" will display the available products. 
 
-![Bamazon Customer](./images/2. products_table.png)
+![Bamazon Customer](./images/customer_start.png)
+
 
 5. Enter the product ID number for the item to be purchased. Then enter the quanity. 
 
 6. After the order is placed, the product's quantity is checked to see if enough is in stock. If the quantity is not enough, the order is cancelled, otherwise the order is completed. The customer may then continue shopping or exit.
 
 #### bamazonCustomer.js
-![Bamazon Customer](./images/1. customer_start.png)
+![Bamazon Customer](./images/products_table.png)
 
 <a name="manager"></a>
 ## Manager View
